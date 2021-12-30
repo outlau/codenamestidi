@@ -1,0 +1,17 @@
+name: CD
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to sti.stidiblitzi.com
+      uses: appleboy/ssh-action@master
+      with:
+        username: ubuntu
+        host: 141.144.237.118
+        password: ${{ secrets.SSH_PASSWORD }}
+        script: 'cd /home/ubuntu && ./test.sh'
