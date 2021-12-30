@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
+import type { GameElement } from './interfaces/game-element';
 
-export const completed = writable(false);
+export const gameElementStore = writable<GameElement>();
 
-export const gyroCompleted = writable(false);
+export const inputButtonsVisible = writable(false);

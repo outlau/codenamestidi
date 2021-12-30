@@ -4,7 +4,7 @@
 
   import { SupabaseObject } from '../db';
   import { onMount } from 'svelte';
-  import type { GameElement } from '../game-element';
+  import type { GameElement } from '../interfaces/game-element';
 
   let tasks: Array<GameElement> = [];
   onMount(async () => {
@@ -16,7 +16,7 @@ Completed tasks:
 
 {#each tasks as task}
   <div class="task-container">
-    <b>{task.textOfDay}</b> <br /> <i>{task.timeApproved.toLocaleString()}</i>
+    <b>{task.textOfDay}</b> <br /> <i>{task.timeCompleted.toLocaleString()}</i>
 
     <div class="icon-container">
       <Icon path="{mdiCheckboxMarkedCircleOutline}" class="green-text" />

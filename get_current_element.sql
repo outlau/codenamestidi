@@ -7,16 +7,16 @@ RETURNS TABLE (
 "approved" bool,
 "timeApproved" timestamp,
 "hint" text,
-"answer" text,
 "currentCount" int2,
 "maxCount" int2,
-"timeDependentTime" text,
-"gyro" bool
+"attributes" json,
+"needsApproval" bool,
+"timeCompleted" timestamp
 )
 LANGUAGE plpgsql AS
 $func$
 BEGIN
    RETURN QUERY
-   SELECT * FROM public."GameElements" ge WHERE ge."timeApproved" >= NOW() - INTERVAL '10 MINS' OR ge."timeApproved" is NULL ORDER BY "id" asc LIMIT 1;
+   SELECT * FROM public."GameElements" ge WHERE ge."timeCompleted" >= NOW() - public.get_interval_time()::INTERVAL OR ge."timeCompleted" is NULL ORDER BY "id" asc LIMIT 1;
 END
 $func$;

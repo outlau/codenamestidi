@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { GameElement } from './game-element';
+import type { GameElement } from './interfaces/game-element';
 
 const supabaseUrl = 'https://aterkwnsxqhjpefecakz.supabase.co';
 // const supabaseKey = process.env.SUPABASE_KEY
@@ -15,14 +15,14 @@ export class SupabaseObject {
   constructor() {}
 
   static async signUp(email, password) {
-    await SupabaseObject.supabase.auth.signUp({
+    return await SupabaseObject.supabase.auth.signUp({
       email,
       password,
     });
   }
 
   static async signIn(email, password) {
-    await SupabaseObject.supabase.auth.signIn({
+    return await SupabaseObject.supabase.auth.signIn({
       email,
       password,
     });
@@ -38,25 +38,46 @@ export class SupabaseObject {
     return {
       ...data[0],
       timeApproved: new Date(data[0].timeApproved + 'Z'),
+      timeCompleted: new Date(data[0].timeCompleted + 'Z'),
       createdAt: new Date(data[0].createdAt + 'Z'),
     } as GameElement;
   }
 
-  static async setGameElementCount(
-    gameElementId: number,
-    gameElementCount: number
-  ) {
+  static async setGameElementCount(gameElement: GameElement): Promise<void> {
     await SupabaseObject.supabase
       .from(tableName)
-      .update({ currentCount: gameElementCount })
-      .match({ id: gameElementId });
+      .update({ currentCount: gameElement.currentCount })
+      .match({ id: gameElement.id });
   }
 
-  static async confirmGameElementFinished(gameElementId: number) {
-    await SupabaseObject.supabase
+  static async confirmGameElementFinished(
+    gameElement: GameElement
+  ): Promise<any> {
+    if (gameElement.needsApproval) {
+      return SupabaseObject.supabase
+        .from(tableName)
+        .update({ completed: true, timeCompleted: new Date() })
+        .match({ id: gameElement.id });
+    }
+    return SupabaseObject.supabase
       .from(tableName)
-      .update({ completed: true })
-      .match({ id: gameElementId });
+      .update({
+        completed: true,
+        approved: true,
+        timeCompleted: new Date(),
+        timeApproved: new Date(),
+      })
+      .match({ id: gameElement.id });
+  }
+
+  static async approveGameElement(gameElement: GameElement): Promise<any> {
+    return SupabaseObject.supabase
+      .from(tableName)
+      .update({
+        approved: true,
+        timeApproved: new Date(),
+      })
+      .match({ id: gameElement.id });
   }
 
   static async getCompletedAndApprovedGameElements(): Promise<GameElement[]> {
@@ -64,13 +85,49 @@ export class SupabaseObject {
       .from(tableName)
       .select()
       .match({ completed: true, approved: true })
+      .order('timeCompleted', { ascending: false });
+    if (error) {
+      throw error;
+    }
+    return data.map((e) => ({
+      ...e,
+      timeApproved: new Date(e.timeApproved + 'Z'),
+      timeCompleted: new Date(e.timeCompleted + 'Z'),
+    })) as Array<GameElement>;
+  }
+
+  static async getGameElementsWaitingForApproval(): Promise<GameElement[]> {
+    const { data, error } = await SupabaseObject.supabase
+      .from(tableName)
+      .select()
+      .match({ completed: true, approved: false, needsApproval: true })
       .order('id', { ascending: false });
     if (error) {
       throw error;
     }
     return data.map((e) => ({
       ...e,
-      timeApproved: new Date(e.timeApproved).toLocaleString(),
+      timeApproved: new Date(e.timeApproved + 'Z'),
+      timeCompleted: new Date(e.timeCompleted + 'Z'),
     })) as Array<GameElement>;
+  }
+
+  static async getIntervalTime(): Promise<string> {
+    const { data, error } = await SupabaseObject.supabase.rpc(
+      'get_interval_time'
+    );
+    if (error) {
+      throw error;
+    }
+    return data as unknown as string;
+  }
+  static async resetGame() {
+    await SupabaseObject.supabase.from(tableName).update({
+      completed: false,
+      approved: false,
+      timeCompleted: null,
+      timeApproved: null,
+      currentCount: 0,
+    });
   }
 }

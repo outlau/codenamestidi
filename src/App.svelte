@@ -1,60 +1,54 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Router, Route, Link } from 'svelte-navigator';
+  import { Link, Route, Router, navigate } from 'svelte-navigator';
   import {
-    MaterialApp,
-    NavigationDrawer,
-    List,
-    ListItem,
-    Avatar,
     Divider,
     Icon,
+    List,
+    ListItem,
+    MaterialApp,
+    NavigationDrawer,
   } from 'svelte-materialify';
-  import {
-    mdiHome,
-    mdiFormatListBulleted,
-    mdiAccount,
-    mdiAccountGroup,
-    mdiMenu,
-    mdiHamburger,
-  } from '@mdi/js';
+  import { mdiFormatListBulleted, mdiHelp, mdiHome, mdiMenu } from '@mdi/js';
 
-  import { completed } from './store';
+  import { gameElementStore } from './store';
 
   import { SupabaseObject } from './db';
-  import type { GameElement } from './game-element';
-  import Game from './components/Game.svelte';
-  import Countdown from './components/Countdown.svelte';
-  import CompletedList from './components/CompletedList.svelte';
-  import Gyro from './components/Gyro.svelte';
-
-  let gameElement: GameElement;
-
-  enum CurrentLocation {
-    Home = 'home',
-    List = 'list',
-  }
-
-  let currentLocation: CurrentLocation = CurrentLocation.Home;
+  import Game from './pages/Home.svelte';
+  import PuzzleCountdown from './pages/PuzzleCountdown.svelte';
+  import CompletedList from './pages/CompletedList.svelte';
+  import { GameType } from './interfaces/game-type';
+  import SecretItem from './pages/SecretItem.svelte';
+  import SignIn from './pages/SignIn.svelte';
+  import Admin from './pages/Admin.svelte';
 
   async function setGameElement() {
-    gameElement = await SupabaseObject.getGameElement();
-    completed.set(gameElement.completed);
+    const gameElement = await SupabaseObject.getGameElement();
+    gameElementStore.set(gameElement);
+    if (
+      gameElement.attributes &&
+      gameElement.attributes.type === GameType.hacker
+    ) {
+      const mainContainer = document.getElementsByClassName('s-app')[0];
+      mainContainer.style.background = 'url(images/matrix.png)';
+    }
   }
+
   onMount(async () => {
-    await SupabaseObject.signIn('la-bobtheko@hotmail.com', '1234qwer');
     const session = SupabaseObject.supabase.auth.session();
+    if (!session) {
+      return navigate('/sign-in', { replace: true });
+    }
     console.log(session);
     await setGameElement();
     setInterval(async () => {
       let tempGameElement = await SupabaseObject.getGameElement();
       if (
-        tempGameElement.id !== gameElement.id ||
-        tempGameElement.approved !== gameElement.approved ||
-        tempGameElement.completed !== gameElement.completed
+        tempGameElement.id !== $gameElementStore.id ||
+        tempGameElement.approved !== $gameElementStore.approved ||
+        tempGameElement.completed !== $gameElementStore.completed
       ) {
-        gameElement = tempGameElement;
-        completed.set(gameElement.completed);
+        gameElementStore.set(tempGameElement);
         return;
       }
     }, 1000);
@@ -64,76 +58,102 @@
 </script>
 
 <Router primary="{false}">
-  <MaterialApp>
-    <button
-      on:click="{() => {
-        menuOpen = !menuOpen;
-      }}"
-      class="hamburger-menu"
-    >
-      <Icon path="{mdiMenu}" />
-    </button>
-    <div class="navdrawer" style="left:{menuOpen ? '0' : '-60px'}">
-      <NavigationDrawer mini="{true}">
-        <ListItem>
-          <span slot="prepend">
-            <button
-              on:click="{() => {
-                menuOpen = !menuOpen;
-              }}"
-              class="nav-hamburger-menu"
-            >
-              <Icon path="{mdiMenu}" />
-            </button>
-          </span>
-        </ListItem>
-        <Divider />
-        <List dense nav>
-          <ListItem>
-            <Link to="/"><Icon path="{mdiHome}" /></Link>
-          </ListItem>
-          <ListItem>
-            <Link to="list"><Icon path="{mdiFormatListBulleted}" /></Link>
-          </ListItem>
+  <div id="parent-container">
+    <MaterialApp>
+      <button
+        on:click="{() => {
+          menuOpen = !menuOpen;
+        }}"
+        class="hamburger-menu"
+      >
+        <Icon path="{mdiMenu}" />
+      </button>
+      <div class="navdrawer" style="left:{menuOpen ? '0' : '-60px'}">
+        <NavigationDrawer mini="{true}">
           <ListItem>
             <span slot="prepend">
-              <Icon path="{mdiAccountGroup}" />
+              <button
+                on:click="{() => {
+                  menuOpen = !menuOpen;
+                }}"
+                class="nav-hamburger-menu"
+              >
+                <Icon path="{mdiMenu}" />
+              </button>
             </span>
           </ListItem>
-        </List>
-      </NavigationDrawer>
-    </div>
+          <Divider />
+          <List dense nav>
+            <ListItem>
+              <Link to="/"><Icon path="{mdiHome}" /></Link>
+            </ListItem>
+            <ListItem>
+              <Link to="list"><Icon path="{mdiFormatListBulleted}" /></Link>
+            </ListItem>
+            {#if $gameElementStore && $gameElementStore.attributes && $gameElementStore.attributes.type === GameType.secretMenuItem}
+              <ListItem>
+                <Link to="verysecretlink"><Icon path="{mdiHelp}" /></Link>
+              </ListItem>
+            {/if}
+          </List>
+        </NavigationDrawer>
+      </div>
 
-    <main>
-      <Route path="">
-        <h1>The adventures of Sti</h1>
-
-        {#if gameElement}
-          {#if !$completed && !gameElement.approved}
-            <Game gameElement="{gameElement}" />
-          {:else if $completed && !gameElement.approved}
-            <div class="info-text">Waiting for approval from the overlord</div>
-            <div class="snippet" data-title=".dot-bricks">
-              <div class="stage">
-                <div class="dot-bricks"></div>
+      <main
+        style="{$gameElementStore &&
+        $gameElementStore.attributes &&
+        $gameElementStore.attributes.type === GameType.hacker
+          ? 'background-image:https://media.istockphoto.com/photos/matrix-picture-id629391430'
+          : ''}"
+      >
+        <Route path="">
+          <h1>The adventures of Sti</h1>
+          {#if $gameElementStore}
+            {#if !$gameElementStore.completed && !$gameElementStore.approved}
+              <Game gameElement="{$gameElementStore}" />
+            {:else if $gameElementStore.completed && !$gameElementStore.approved}
+              <div class="info-text">
+                Waiting for approval from the overlord
               </div>
-            </div>
-          {:else if $completed && gameElement.approved}
-            <Countdown style="margin: 50px" gameElement="{gameElement}" />
+              <div class="snippet" data-title=".dot-bricks">
+                <div class="stage">
+                  <div class="dot-bricks"></div>
+                </div>
+              </div>
+            {:else if $gameElementStore.completed && $gameElementStore.approved}
+              <PuzzleCountdown />
+            {/if}
+          {:else}
+            <div class="info-text">Fetching...</div>
           {/if}
-        {:else}
-          <div class="info-text">Fetching...</div>
-        {/if}
-      </Route>
-      <Route path="list">
-        <CompletedList />
-      </Route>
-    </main>
-  </MaterialApp>
+        </Route>
+        <Route path="list">
+          <CompletedList />
+        </Route>
+        <Route path="verysecretlink">
+          <SecretItem />
+        </Route>
+        <Route path="sign-in">
+          <SignIn signingUp="{false}" />
+        </Route>
+        <Route path="sign-up">
+          <SignIn signingUp="{true}" />
+        </Route>
+        <Route path="admin">
+          <Admin />
+        </Route>
+      </main>
+    </MaterialApp>
+  </div>
 </Router>
 
 <style lang="scss">
   $main-color: #0e3c79;
+
+  #parent-container {
+    width: 100%;
+    height: 100%;
+  }
   .navdrawer {
     position: absolute;
     height: 100%;
@@ -149,11 +169,12 @@
     left: 16px;
   }
   main {
-    padding-top: 50px;
+    padding: 50px 10px;
     text-align: center;
     max-width: 240px;
     margin: 0 auto;
     font-weight: 300;
+    background: white;
   }
 
   .snippet {
