@@ -9,9 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Deploy to sti.stidiblitzi.com
-      uses: appleboy/ssh-action@master
+      uses: fifsky/ssh-action@master
       with:
-        username: ubuntu
+        command: |
+          cd /home/ubuntu
+          ./test.sh
         host: 141.144.237.118
-        password: ${{ secrets.SSH_KEY }}
-        script: 'cd /home/ubuntu && ./test.sh'
+        user: ubuntu
+        key: ${{ secrets.SSH_KEY}}
