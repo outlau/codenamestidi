@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rollup -c",
+    "build": "NODE_ENV=production rollup -c",
     "dev": "HOST=0.0.0.0 rollup -c -w",
     "start:dev": "sirv public --dev -s",
     "start": "HOST=0.0.0.0 sirv public --no-clear --single",
