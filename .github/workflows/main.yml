@@ -13,7 +13,7 @@ jobs:
       with:
         command: |
           cd /home/ubuntu
-          ./test.sh
+          ./deploy.sh
         host: 141.144.237.118
         user: ubuntu
         key: ${{ secrets.SSH_KEY}}
