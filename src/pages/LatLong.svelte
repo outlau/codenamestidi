@@ -19,8 +19,8 @@
       (success) => {
         lat = success.coords.latitude;
         long = success.coords.longitude;
-        const latBetween = between(lat, 55.71102, 55.711386);
-        const longBetween = between(long, 12.495874, 12.496526);
+        const latBetween = between(lat, 55.711013, 55.711386);
+        const longBetween = between(long, 12.495867, 12.496526);
         console.log(success);
         if (latBetween && longBetween) {
           inputButtonsVisible.set(true);
@@ -46,7 +46,7 @@
   // 55.711386, 12.496186
 
   // DOWN
-  // 55.711020, 12.496205
+  // 55.711013, 12.496205
 
   // RIGHT
   // 55.711201, 12.496526
