@@ -126,6 +126,9 @@
           <h1>The adventures of Sti</h1>
           {#if $gameElementStore}
             {#if !$gameElementStore.completed && !$gameElementStore.approved}
+              <div style="margin-bottom:15px; font-style:italic">
+                Event number: {$gameElementStore.id}
+              </div>
               <Home />
             {:else if $gameElementStore.completed && !$gameElementStore.approved}
               <div class="info-text">
