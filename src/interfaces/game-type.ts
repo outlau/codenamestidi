@@ -13,4 +13,7 @@ export enum GameType {
   typeStidi = 'typeStidi',
   spinProgressBar = 'spinProgressBar',
   hacker = 'hacker',
+  hiddenMessage = 'hiddenMessage',
+  oppositeDay='oppositeDay',
+  secretUrl = 'secretUrl'
 }

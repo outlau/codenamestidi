@@ -10,12 +10,16 @@
   onMount(async () => {
     tasks = await SupabaseObject.getCompletedAndApprovedGameElements();
   });
+
+  function clickGameElement(gameElement: GameElement) {
+    window.location.href = `/list/${gameElement.id}`;
+  }
 </script>
 
 Completed tasks:
 
 {#each tasks as task}
-  <div class="task-container">
+  <div on:click="{() => clickGameElement(task)}" class="task-container">
     <b>{task.textOfDay}</b> <br /> <i>{task.timeCompleted.toLocaleString()}</i>
 
     <div class="icon-container">
@@ -26,6 +30,7 @@ Completed tasks:
 
 <style lang="scss">
   .task-container {
+    cursor: pointer;
     position: relative;
     border-radius: 10px;
     text-align: left;

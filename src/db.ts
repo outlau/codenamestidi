@@ -43,6 +43,22 @@ export class SupabaseObject {
     } as GameElement;
   }
 
+  static async getGameElementById(id: number): Promise<GameElement> {
+    const { data, error } = await SupabaseObject.supabase
+      .from(tableName)
+      .select()
+      .match({ id });
+    if (error) {
+      throw error;
+    }
+    return {
+      ...data[0],
+      timeApproved: new Date(data[0].timeApproved + 'Z'),
+      timeCompleted: new Date(data[0].timeCompleted + 'Z'),
+      createdAt: new Date(data[0].createdAt + 'Z'),
+    } as GameElement;
+  }
+
   static async setGameElementCount(gameElement: GameElement): Promise<void> {
     await SupabaseObject.supabase
       .from(tableName)
@@ -129,5 +145,15 @@ export class SupabaseObject {
       timeApproved: null,
       currentCount: 0,
     });
+    await SupabaseObject.supabase
+      .from(tableName)
+      .update({
+        completed: false,
+        approved: false,
+        timeCompleted: null,
+        timeApproved: null,
+        currentCount: 1,
+      })
+      .match({ textOfDay: 'Not opposite day' });
   }
 }

@@ -14,7 +14,7 @@
   import { gameElementStore } from './store';
 
   import { SupabaseObject } from './db';
-  import Game from './pages/Home.svelte';
+  import Home from './pages/Home.svelte';
   import PuzzleCountdown from './pages/PuzzleCountdown.svelte';
   import CompletedList from './pages/CompletedList.svelte';
   import { GameType } from './interfaces/game-type';
@@ -39,7 +39,16 @@
     if (!session) {
       return navigate('/sign-in', { replace: true });
     }
-    console.log(session);
+    if (window.location.pathname.includes('list/')) {
+      // Oooooff ouch
+      const id = window.location.pathname.split('/').filter((e) => e)[1];
+      const gameElement = await SupabaseObject.getGameElementById(Number(id));
+      if (!gameElement) {
+        throw new Error('No game element found for id ' + id);
+      }
+      gameElementStore.set(gameElement);
+      return;
+    }
     await setGameElement();
     setInterval(async () => {
       let tempGameElement = await SupabaseObject.getGameElement();
@@ -49,6 +58,13 @@
         tempGameElement.completed !== $gameElementStore.completed
       ) {
         gameElementStore.set(tempGameElement);
+        if (
+          tempGameElement.attributes &&
+          tempGameElement.attributes.type === GameType.hacker
+        ) {
+          const mainContainer = document.getElementsByClassName('s-app')[0];
+          mainContainer.style.background = 'url(images/matrix.png)';
+        }
         return;
       }
     }, 1000);
@@ -110,7 +126,7 @@
           <h1>The adventures of Sti</h1>
           {#if $gameElementStore}
             {#if !$gameElementStore.completed && !$gameElementStore.approved}
-              <Game gameElement="{$gameElementStore}" />
+              <Home />
             {:else if $gameElementStore.completed && !$gameElementStore.approved}
               <div class="info-text">
                 Waiting for approval from the overlord
@@ -133,6 +149,9 @@
         <Route path="verysecretlink">
           <SecretItem />
         </Route>
+        <Route path="stidi">
+          <SecretItem />
+        </Route>
         <Route path="sign-in">
           <SignIn signingUp="{false}" />
         </Route>
@@ -141,6 +160,14 @@
         </Route>
         <Route path="admin">
           <Admin />
+        </Route>
+        <Route path="list/:id">
+          <h1>The adventures of Sti</h1>
+          {#if $gameElementStore}
+            <Home />
+          {:else}
+            Fetching...
+          {/if}
         </Route>
       </main>
     </MaterialApp>

@@ -22,10 +22,13 @@
 
   onDestroy(() => {
     inputButtonsVisible.set(false);
-  })
+  });
 
   function input() {
-    if (value.toLowerCase().trim() === $gameElementStore.attributes.answer) {
+    if (
+      value.toLowerCase().trim() ===
+      $gameElementStore.attributes.answer.toLowerCase().trim()
+    ) {
       inputButtonsVisible.set(true);
       answerMsg = correctAnswerMsg;
       return;

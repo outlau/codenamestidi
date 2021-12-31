@@ -17,33 +17,7 @@
   import DragPlusButton from './DragPlusButton.svelte';
   import TypeStidi from './TypeStidi.svelte';
   import SpinProgressBar from './SpinProgressBar.svelte';
-
-  export let gameElement: GameElement;
-
-  let active = false;
-
-  let atCorrectRange = false;
-
-  // onMount(() => {
-  //   // if ($gameElementStore.currentCount === $gameElementStore.maxCount) {
-  //   //   value = gameElement.answer;
-  //   //   answerMsg = correctAnswerMsg;
-  //   // }
-  //   console.log(gameElement);
-  //   if (gameElement.timeDependentTime) {
-  //     setInterval(() => {
-  //       const curMinutes = new Date().getMinutes();
-  //       const timeDependentMinutes = Number(
-  //         gameElement.timeDependentTime.split(':')[1]
-  //       );
-  //       atCorrectRange = curMinutes === timeDependentMinutes;
-  //       console.log(curMinutes);
-  //       console.log(timeDependentMinutes);
-  //       console.log(typeof curMinutes);
-  //       console.log(typeof timeDependentMinutes);
-  //     }, 1000);
-  //   }
-  // });
+  import OppositeDay from './OppositeDay.svelte';
 
   async function confirm() {
     await SupabaseObject.confirmGameElementFinished($gameElementStore);
@@ -51,23 +25,9 @@
       state.completed = true;
       return state;
     });
-    window.location.href = '/'
+    window.location.href = '/';
   }
 </script>
-
-<!--{#if gameElement.gyro}-->
-<!--  <Gyro gameElement="{gameElement}" counter="{counter}" maxCount="{maxCount}" />-->
-<!--  <LatLong-->
-<!--    gameElement="{gameElement}"-->
-<!--    counter="{counter}"-->
-<!--    maxCount="{maxCount}"-->
-<!--  />-->
-<!--  <PaintSpinner-->
-<!--    gameElement="{gameElement}"-->
-<!--    counter="{counter}"-->
-<!--    maxCount="{maxCount}"-->
-<!--  />-->
-<!--{:else}-->
 
 {#if !$gameElementStore.attributes}
   <Counter setInputButtonsVisible="{true}" />
@@ -95,11 +55,16 @@
   <TypeStidi />
 {:else if $gameElementStore.attributes.type === GameType.spinProgressBar}
   <SpinProgressBar />
+{:else if $gameElementStore.attributes.type === GameType.hiddenMessage}
+  <Answer />
+  <p class="hidden-message">Stisan is blitzan</p>
+{:else if $gameElementStore.attributes.type === GameType.oppositeDay}
+  <OppositeDay />
+{:else if $gameElementStore.attributes.type === GameType.secretUrl}
+  <Counter setInputButtonsVisible="{false}" />
 {/if}
 
-<!--{/if}-->
-
-{#if $gameElementStore.currentCount >= $gameElementStore.maxCount}
+{#if $gameElementStore.currentCount >= $gameElementStore.maxCount && !($gameElementStore && $gameElementStore.attributes && $gameElementStore.attributes.type === GameType.oppositeDay)}
   <div class="approve-request-container">
     <div class="approve-request-text">
       Do you wish to submit your request for approval?
@@ -116,6 +81,13 @@
     left: 25px;
   }
 
+  .hidden-message {
+    position: absolute;
+    left: 20px;
+    bottom: 50px;
+    transform: rotateZ(90deg);
+    color: white;
+  }
   $main-color: #0e3c79;
   :global(.progress-container) {
     margin: 60px auto;
