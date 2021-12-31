@@ -13,6 +13,7 @@
 
   let geo;
 
+  let suc = false;
   onMount(() => {
     inputButtonsVisible.set(false);
     geo = navigator.geolocation.watchPosition(
@@ -24,9 +25,12 @@
         console.log(success);
         if (latBetween && longBetween) {
           inputButtonsVisible.set(true);
+          suc = true;
           return;
+        } else {
+          suc = false;
+          inputButtonsVisible.set(false);
         }
-        inputButtonsVisible.set(false);
       },
       (error) => {
         message = error.message;
@@ -39,7 +43,7 @@
     inputButtonsVisible.set(false);
   });
 
-  // 55.711205, 12.496190
+  // 55.711231, 12.495867
 
   // Y          X
   // UP
@@ -55,6 +59,10 @@
   // 55.711218, 12.495874
 </script>
 
+{suc}
+<br />
+{$inputButtonsVisible}
+<br />
 {lat}
 <br />
 {long}
