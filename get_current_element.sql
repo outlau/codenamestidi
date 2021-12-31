@@ -1,6 +1,5 @@
 CREATE OR REPLACE FUNCTION select_current_game_element()
 RETURNS TABLE (
-"id" int8,
 "createdAt" timestamptz,
 "textOfDay" text,
 "completed"	bool,
@@ -11,7 +10,8 @@ RETURNS TABLE (
 "maxCount" int2,
 "attributes" json,
 "needsApproval" bool,
-"timeCompleted" timestamp
+"timeCompleted" timestamp,
+"id" int8
 )
 LANGUAGE plpgsql AS
 $func$

@@ -26,7 +26,8 @@
         throw Error('Invalid unit ' + unit);
     }
     countdownEnds = new Date(
-      $gameElementStore.timeCompleted.getTime() + Number(duration) * countdownMlt
+      $gameElementStore.timeCompleted.getTime() +
+        Number(duration) * countdownMlt
     );
     setCountdownVariables();
     setInterval(() => {
@@ -56,3 +57,7 @@
 
 <p>Next event in:</p>
 <p class="info-text">{hours}h {minutes}m {seconds}s</p>
+<p>
+  If you haven't already received your prize for this event, please contact the
+  overlord.
+</p>
