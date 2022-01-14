@@ -10,6 +10,7 @@
     NavigationDrawer,
   } from 'svelte-materialify';
   import { mdiFormatListBulleted, mdiHelp, mdiHome, mdiMenu } from '@mdi/js';
+  import { Fireworks } from 'fireworks-js';
 
   import { gameElementStore } from './store';
 
@@ -22,8 +23,24 @@
   import SignIn from './pages/SignIn.svelte';
   import Admin from './pages/Admin.svelte';
 
+  let finishedGame = false;
+
   async function setGameElement() {
     const gameElement = await SupabaseObject.getGameElement();
+    console.log(gameElement);
+    if (!gameElement || (gameElement.id === 30 && gameElement.approved)) {
+      finishedGame = true;
+      setTimeout(() => {
+        const container = document.querySelector('.fireworks-container');
+        const fireworks = new Fireworks(container, {
+          /* options */
+        });
+        fireworks.setOptions({ delay: { min: 10, max: 15 } });
+
+        fireworks.start();
+      }, 100);
+      return false;
+    }
     gameElementStore.set(gameElement);
     if (
       gameElement.attributes &&
@@ -32,6 +49,7 @@
       const mainContainer = document.getElementsByClassName('s-app')[0];
       mainContainer.style.background = 'url(images/matrix.png)';
     }
+    return true;
   }
 
   onMount(async () => {
@@ -49,7 +67,10 @@
       gameElementStore.set(gameElement);
       return;
     }
-    await setGameElement();
+    const ret = await setGameElement();
+    if (!ret) {
+      return;
+    }
     setInterval(async () => {
       let tempGameElement = await SupabaseObject.getGameElement();
       if (
@@ -124,7 +145,15 @@
       >
         <Route path="">
           <h1>The adventures of Sti</h1>
-          {#if $gameElementStore}
+          {#if finishedGame}
+            Congratulations you have successfully completed the Adventures of
+            Sti. Please contact the overlord to receive your final prize if you
+            haven't already.
+
+            <div class="fireworks-container"></div>
+
+            <div class="finished-text">YOU DID IT</div>
+          {:else if $gameElementStore}
             {#if !$gameElementStore.completed && !$gameElementStore.approved}
               <div style="margin-bottom:15px; font-style:italic">
                 Event number: {$gameElementStore.id}
@@ -205,6 +234,15 @@
     margin: 0 auto;
     font-weight: 300;
     background: white;
+  }
+
+  .fireworks-container {
+    top: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 
   .snippet {
@@ -294,6 +332,107 @@
   @media (min-width: 640px) {
     main {
       max-width: 500px;
+    }
+  }
+
+  .finished-text {
+    color: black;
+
+    width: 420px;
+    height: 250px;
+
+    font-family: 'Oswald', sans-serif;
+    font-size: 9em;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+
+    -webkit-transform: rotateX(25deg) rotateY(20deg) rotateZ(-3deg);
+    transform: rotateX(25deg) rotateY(20deg) rotateZ(-3deg);
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -180px;
+
+    -webkit-animation: anim 3s;
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-iteration-count: infinite;
+
+    animation: anim 3s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  @-webkit-keyframes anim {
+    0% {
+      text-shadow: -6px 4px 0px red;
+    }
+    10% {
+      text-shadow: 4px -6px 0px green;
+    }
+    20% {
+      text-shadow: -9px 4px 0px blue;
+    }
+    30% {
+      text-shadow: 4px -6px 0px yellow;
+    }
+    40% {
+      text-shadow: -8px 4px 0px orange;
+    }
+    50% {
+      text-shadow: 4px 5px 0px purple;
+    }
+    60% {
+      text-shadow: -6px 4px 0px brown;
+    }
+    70% {
+      text-shadow: 4px 7px 0px pink;
+    }
+    80% {
+      text-shadow: -9px -4px 0px lime;
+    }
+    90% {
+      text-shadow: 4px -6px 0px cyan;
+    }
+    100% {
+      text-shadow: -9px 4px 0px teal;
+    }
+  }
+
+  @keyframes anim {
+    0% {
+      text-shadow: -6px 4px 0px red;
+    }
+    10% {
+      text-shadow: 4px -6px 0px green;
+    }
+    20% {
+      text-shadow: -9px 4px 0px blue;
+    }
+    30% {
+      text-shadow: 4px -6px 0px yellow;
+    }
+    40% {
+      text-shadow: -8px 4px 0px orange;
+    }
+    50% {
+      text-shadow: 4px 5px 0px purple;
+    }
+    60% {
+      text-shadow: -6px 4px 0px brown;
+    }
+    70% {
+      text-shadow: 4px 7px 0px pink;
+    }
+    80% {
+      text-shadow: -9px -4px 0px lime;
+    }
+    90% {
+      text-shadow: 4px -6px 0px cyan;
+    }
+    100% {
+      text-shadow: -9px 4px 0px teal;
     }
   }
 </style>

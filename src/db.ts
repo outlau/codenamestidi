@@ -35,6 +35,9 @@ export class SupabaseObject {
     if (error) {
       throw error;
     }
+    if(!data){
+      return null;
+    }
     return {
       ...data[0],
       timeApproved: new Date(data[0].timeApproved + 'Z'),
