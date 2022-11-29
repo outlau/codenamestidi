@@ -29,20 +29,45 @@ export class SupabaseObject {
   }
 
   static async getGameElement(): Promise<GameElement> {
-    const { data, error } = await SupabaseObject.supabase.rpc(
-      'select_current_game_element'
-    );
+    const { data, error } = await SupabaseObject.supabase
+      .from(tableName)
+      .select()
+      .is('timeCompleted', null)
+      .lte('startTime', 'NOW()')
+      .order('startTime', { ascending: true })
+      .limit(1);
     if (error) {
       throw error;
     }
-    if(!data){
+    if (!data || data.length === 0) {
       return null;
     }
     return {
       ...data[0],
-      timeApproved: new Date(data[0].timeApproved + 'Z'),
       timeCompleted: new Date(data[0].timeCompleted + 'Z'),
       createdAt: new Date(data[0].createdAt + 'Z'),
+      startTime: new Date(data[0].startTime + 'Z'),
+    } as GameElement;
+  }
+
+  static async getNextGameElement(): Promise<GameElement> {
+    const { data, error } = await SupabaseObject.supabase
+      .from(tableName)
+      .select()
+      .is('timeCompleted', null)
+      .order('startTime', { ascending: true })
+      .limit(1);
+    if (error) {
+      throw error;
+    }
+    if(!data || data.length === 0) {
+      return null;
+    }
+    return {
+      ...data[0],
+      timeCompleted: new Date(data[0].timeCompleted + 'Z'),
+      createdAt: new Date(data[0].createdAt + 'Z'),
+      startTime: new Date(data[0].startTime + 'Z'),
     } as GameElement;
   }
 
@@ -56,7 +81,6 @@ export class SupabaseObject {
     }
     return {
       ...data[0],
-      timeApproved: new Date(data[0].timeApproved + 'Z'),
       timeCompleted: new Date(data[0].timeCompleted + 'Z'),
       createdAt: new Date(data[0].createdAt + 'Z'),
     } as GameElement;
@@ -75,7 +99,7 @@ export class SupabaseObject {
     if (gameElement.needsApproval) {
       return SupabaseObject.supabase
         .from(tableName)
-        .update({ completed: true, timeCompleted: new Date() })
+        .update({ completed: true })
         .match({ id: gameElement.id });
     }
     return SupabaseObject.supabase
@@ -84,7 +108,6 @@ export class SupabaseObject {
         completed: true,
         approved: true,
         timeCompleted: new Date(),
-        timeApproved: new Date(),
       })
       .match({ id: gameElement.id });
   }
@@ -94,7 +117,7 @@ export class SupabaseObject {
       .from(tableName)
       .update({
         approved: true,
-        timeApproved: new Date(),
+        timeCompleted: new Date(),
       })
       .match({ id: gameElement.id });
   }
@@ -110,7 +133,6 @@ export class SupabaseObject {
     }
     return data.map((e) => ({
       ...e,
-      timeApproved: new Date(e.timeApproved + 'Z'),
       timeCompleted: new Date(e.timeCompleted + 'Z'),
     })) as Array<GameElement>;
   }
@@ -126,7 +148,6 @@ export class SupabaseObject {
     }
     return data.map((e) => ({
       ...e,
-      timeApproved: new Date(e.timeApproved + 'Z'),
       timeCompleted: new Date(e.timeCompleted + 'Z'),
     })) as Array<GameElement>;
   }
@@ -141,20 +162,21 @@ export class SupabaseObject {
     return data as unknown as string;
   }
   static async resetGame() {
-    await SupabaseObject.supabase.from(tableName).update({
-      completed: false,
-      approved: false,
-      timeCompleted: null,
-      timeApproved: null,
-      currentCount: 0,
-    });
     await SupabaseObject.supabase
       .from(tableName)
       .update({
         completed: false,
         approved: false,
         timeCompleted: null,
-        timeApproved: null,
+        currentCount: 0,
+      })
+      .gte('id', 0);
+    await SupabaseObject.supabase
+      .from(tableName)
+      .update({
+        completed: false,
+        approved: false,
+        timeCompleted: null,
         currentCount: 1,
       })
       .match({ textOfDay: 'Not opposite day' });

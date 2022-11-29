@@ -1,6 +1,5 @@
 <script lang="ts">
   import { gameElementStore } from '../store';
-
 </script>
 
 <div class="progress-container">
@@ -10,6 +9,7 @@
   </div>
   <div
     class="progress-bar"
-    style="width: {(100 * $gameElementStore.currentCount) / $gameElementStore.maxCount}%"
+    style="width: {(100 * $gameElementStore.currentCount) /
+      $gameElementStore.maxCount}%"
   ></div>
 </div>

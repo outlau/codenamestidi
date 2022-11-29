@@ -15,5 +15,11 @@ export enum GameType {
   hacker = 'hacker',
   hiddenMessage = 'hiddenMessage',
   oppositeDay='oppositeDay',
-  secretUrl = 'secretUrl'
+  secretUrl = 'secretUrl',
+  snowball = 'snowball',
+spinPlus = 'spinPlus',
+  candle='candle',
+  movingPlus='movingPlus',
+  gravityPlusButton='gravityPlusButton',
+  movingMan='movingMan',
 }

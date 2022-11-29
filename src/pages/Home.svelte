@@ -18,6 +18,16 @@
   import TypeStidi from './TypeStidi.svelte';
   import SpinProgressBar from './SpinProgressBar.svelte';
   import OppositeDay from './OppositeDay.svelte';
+  import MoveMan from './MoveMan.svelte';
+  import Pinball from './Pinball.svelte';
+  import ActualPinball from './ActualPinball.svelte';
+  import Pinball2 from './Pinball2.svelte';
+  import LetterMover from './LetterMover.svelte';
+  import GravityPlusButton from './GravityPlusButton.svelte';
+  import Candle from './Candle.svelte';
+  import MovingPlusButton from './MovingPlusButton.svelte';
+  import SpinningPlusButton from './SpinningPlusButton.svelte';
+  import SnowballDrag from './SnowballDrag.svelte';
 
   async function confirm() {
     await SupabaseObject.confirmGameElementFinished($gameElementStore);
@@ -29,7 +39,21 @@
   }
 </script>
 
+<!--  <MoveMan />-->
+<!--  <ActualPinball />-->
+<!--  <Pinball />-->
+<!--  <LetterMover />-->
+<!--  <GravityPlusButton />-->
+<!--<MovingPlusButton />-->
+
+<!--  <Candle />-->
+<!--  <SpinningPlusButton />-->
+<!--  <SnowballDrag />-->
+<!--  <Pinball2 />-->
+
 {#if !$gameElementStore.attributes}
+  <Counter setInputButtonsVisible="{true}" />
+{:else if !$gameElementStore.attributes}
   <Counter setInputButtonsVisible="{true}" />
 {:else if $gameElementStore.attributes.type === GameType.answer || $gameElementStore.attributes.type === GameType.hacker}
   <Answer />

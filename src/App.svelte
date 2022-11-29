@@ -11,6 +11,7 @@
   } from 'svelte-materialify';
   import { mdiFormatListBulleted, mdiHelp, mdiHome, mdiMenu } from '@mdi/js';
   import { Fireworks } from 'fireworks-js';
+  import { isEqual } from 'lodash';
 
   import { gameElementStore } from './store';
 
@@ -22,34 +23,49 @@
   import SecretItem from './pages/SecretItem.svelte';
   import SignIn from './pages/SignIn.svelte';
   import Admin from './pages/Admin.svelte';
+  import type { GameElement } from './interfaces/game-element';
 
   let finishedGame = false;
+  let nextGameElement: GameElement;
 
   async function setGameElement() {
-    const gameElement = await SupabaseObject.getGameElement();
-    console.log(gameElement);
-    if (!gameElement || (gameElement.id === 30 && gameElement.approved)) {
-      finishedGame = true;
-      setTimeout(() => {
-        const container = document.querySelector('.fireworks-container');
-        const fireworks = new Fireworks(container, {
-          /* options */
-        });
-        fireworks.setOptions({ delay: { min: 10, max: 15 } });
+    if(finishedGame) {
+      return;
+    }
+    let tempGameElement = await SupabaseObject.getGameElement();
+    if (!tempGameElement) {
+      nextGameElement = await SupabaseObject.getNextGameElement();
+      if (!nextGameElement) {
+        finishedGame = true;
+        finishGame();
+      }
+      return;
+    }
+    nextGameElement = null;
+    if (!isEqual(tempGameElement, $gameElementStore)) {
+      gameElementStore.set(tempGameElement);
+      if (
+        tempGameElement.attributes &&
+        tempGameElement.attributes.type === GameType.hacker
+      ) {
+        const mainContainer = document.getElementsByClassName('s-app')[0];
+        mainContainer.style.background = 'url(images/matrix.png)';
+      }
+      return;
+    }
+  }
 
-        fireworks.start();
-      }, 100);
-      return false;
-    }
-    gameElementStore.set(gameElement);
-    if (
-      gameElement.attributes &&
-      gameElement.attributes.type === GameType.hacker
-    ) {
-      const mainContainer = document.getElementsByClassName('s-app')[0];
-      mainContainer.style.background = 'url(images/matrix.png)';
-    }
-    return true;
+  function finishGame() {
+    finishedGame = true;
+    setTimeout(() => {
+      const container = document.querySelector('.fireworks-container');
+      const fireworks = new Fireworks(container, {
+        /* options */
+      });
+      fireworks.setOptions({ delay: { min: 10, max: 15 } });
+
+      fireworks.start();
+    }, 100);
   }
 
   onMount(async () => {
@@ -67,27 +83,21 @@
       gameElementStore.set(gameElement);
       return;
     }
-    const ret = await setGameElement();
-    if (!ret) {
-      return;
-    }
+
+    // const gameElement = await setGameElement();
+    // if (!gameElement) {
+    //   const nextGameElement = await SupabaseObject.getNextGameElement();
+    //   console.log(nextGameElement);
+    //   // gameElementStore.set(nextGameElement);
+    //   if (!nextGameElement && !finishedGame) {
+    //     finishGame();
+    //   }
+    //   return;
+    // }
+
+    await setGameElement();
     setInterval(async () => {
-      let tempGameElement = await SupabaseObject.getGameElement();
-      if (
-        tempGameElement.id !== $gameElementStore.id ||
-        tempGameElement.approved !== $gameElementStore.approved ||
-        tempGameElement.completed !== $gameElementStore.completed
-      ) {
-        gameElementStore.set(tempGameElement);
-        if (
-          tempGameElement.attributes &&
-          tempGameElement.attributes.type === GameType.hacker
-        ) {
-          const mainContainer = document.getElementsByClassName('s-app')[0];
-          mainContainer.style.background = 'url(images/matrix.png)';
-        }
-        return;
-      }
+      await setGameElement();
     }, 1000);
   });
 
@@ -144,7 +154,8 @@
           : ''}"
       >
         <Route path="">
-          <h1>The adventures of Sti</h1>
+          <!-- TODO -->
+          <h1>The <br /> adventures of <br /> Sti</h1>
           {#if finishedGame}
             Congratulations you have successfully completed the Adventures of
             Sti. Please contact the overlord to receive your final prize if you
@@ -156,21 +167,21 @@
           {:else if $gameElementStore}
             {#if !$gameElementStore.completed && !$gameElementStore.approved}
               <div style="margin-bottom:15px; font-style:italic">
-                Event number: {$gameElementStore.id}
+                Event date: {$gameElementStore.startTime.toLocaleDateString()}
               </div>
               <Home />
             {:else if $gameElementStore.completed && !$gameElementStore.approved}
               <div class="info-text">
-                Waiting for approval from the overlord
+                Waiting for approval from the christmas elf
               </div>
               <div class="snippet" data-title=".dot-bricks">
                 <div class="stage">
                   <div class="dot-bricks"></div>
                 </div>
               </div>
-            {:else if $gameElementStore.completed && $gameElementStore.approved}
-              <PuzzleCountdown />
             {/if}
+          {:else if !$gameElementStore && nextGameElement}
+            <PuzzleCountdown nextGameElement="{nextGameElement}" />
           {:else}
             <div class="info-text">Fetching...</div>
           {/if}
@@ -228,10 +239,14 @@
     left: 16px;
   }
   main {
-    padding: 50px 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 50px 0;
     text-align: center;
-    max-width: 240px;
-    margin: 0 auto;
+    //max-width: 240px;
     font-weight: 300;
     background: white;
   }
@@ -248,7 +263,7 @@
   .snippet {
     text-align: center;
     left: calc(50% - 5px);
-    position: absolute;
+    //position: absolute;
     margin-top: 20px;
     .dot-bricks {
       position: relative;
@@ -331,7 +346,7 @@
 
   @media (min-width: 640px) {
     main {
-      max-width: 500px;
+      //max-width: 500px;
     }
   }
 
@@ -342,7 +357,7 @@
     height: 250px;
 
     font-family: 'Oswald', sans-serif;
-    font-size: 9em;
+    font-size: 7em;
     line-height: 1;
     margin: 0;
     padding: 0;

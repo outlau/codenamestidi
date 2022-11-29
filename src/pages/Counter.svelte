@@ -9,7 +9,6 @@
     inputButtonsVisible.set(setInputButtonsVisible);
   });
 
-
   onDestroy(() => {
     inputButtonsVisible.set(false);
   })

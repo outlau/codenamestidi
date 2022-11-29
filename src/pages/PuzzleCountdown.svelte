@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { gameElementStore } from '../store';
   import { SupabaseObject } from '../db';
+  import type { GameElement } from '../interfaces/game-element';
+  export let nextGameElement: GameElement;
 
   let countdownMlt = 0;
 
@@ -10,25 +11,8 @@
   let seconds = 0;
   let countdownEnds;
   onMount(async () => {
-    const intervalTime = await SupabaseObject.getIntervalTime();
-    const [duration, unit] = intervalTime.trim().split(' ');
-    switch (unit.toLowerCase()) {
-      case 'mins':
-        countdownMlt = 60000;
-        break;
-      case 'hours':
-        countdownMlt = 60000 * 60;
-        break;
-      case 'second':
-        countdownMlt = 60000 / 60;
-        break;
-      default:
-        throw Error('Invalid unit ' + unit);
-    }
-    countdownEnds = new Date(
-      $gameElementStore.timeCompleted.getTime() +
-        Number(duration) * countdownMlt
-    );
+    countdownEnds = new Date(nextGameElement.startTime);
+    console.log(countdownEnds);
     setCountdownVariables();
     setInterval(() => {
       setCountdownVariables();

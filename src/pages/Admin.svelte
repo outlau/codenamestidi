@@ -34,7 +34,7 @@ Completed tasks:
 <Button on:click="{reset}">Reset everything</Button>
 {#each tasks as task}
   <div on:click="{() => approve(task)}" class="task-container">
-    <b>{task.textOfDay}</b> <br /> <i>{task.timeCompleted.toLocaleString()}</i>
+    <b>{task.textOfDay}</b> <br />
 
     <div class="icon-container">
       <Icon path="{mdiCheckboxMarkedCircleOutline}" class="green-text" />

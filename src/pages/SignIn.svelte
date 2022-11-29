@@ -64,7 +64,8 @@
   const errorMessageText = 'Passwords must match';
 </script>
 
-Sign in!<br />
+Sign in!
+<br />
 <TextField outlined on:input="{inputEmail}">Email</TextField>
 <TextField outlined type="password" on:input="{inputPassword}">
   Password
@@ -106,9 +107,9 @@ Sign in!<br />
     </Button>
   </div>
 
-  <Link style="margin-top: 15px;" to="/sign-up"
-    >Not a user yet? Sign up here</Link
-  >
+  <Link style="margin-top: 15px;" to="/sign-up">
+    Not a user yet? Sign up here
+  </Link>
 {/if}
 
 <style lang="scss">

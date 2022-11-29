@@ -6,13 +6,13 @@ export interface GameElement {
   textOfDay: string;
   completed: boolean;
   approved: boolean;
-  timeApproved?: Date;
   hint?: string;
   currentCount?: number;
   maxCount?: number;
   attributes?: AnswerAttribute | TimeDependentAttribute;
   needsApproval: boolean;
   timeCompleted?: Date;
+  startTime: Date;
 }
 interface GenericAttributes {
   type: GameType;
