@@ -2,18 +2,18 @@ name: CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy to sti.stidiblitzi.com
-      uses: fifsky/ssh-action@master
-      with:
-        command: |
-          cd /home/ubuntu
-          ./deploy.sh
-        host: 141.144.237.118
-        user: ubuntu
-        key: ${{ secrets.SSH_KEY}}
+      - name: Deploy to sti.stidiblitzi.com
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd /home/ubuntu
+            ./deploy.sh
+          host: 141.144.237.118
+          user: ubuntu
+          key: ${{ secrets.SSH_KEY}}

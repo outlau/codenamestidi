@@ -18,7 +18,7 @@
 
 <main>
   <h1>The adventures of Sti</h1>
-  <input type="hidden">
+  <input type="hidden" />
 </main>
 
 <style lang="scss">

@@ -23,7 +23,7 @@
     progressBar = document.getElementById('game-progress-container');
 
     canvasWidth = canvasContainer.offsetWidth;
-    canvasHeight = 800;
+    canvasHeight = document.body.clientHeight;
     // create engine
     engine = Engine.create();
     const world = engine.world;
@@ -191,8 +191,8 @@
         },
       }
     );
-    const max = 0.0058;
-    const min = 0.004;
+    const max = 0.005;
+    const min = 0.0035;
     const yForce = Math.random() * (min - max) + max;
     ball.force = { x: 0, y: -yForce };
     Composite.add(engine.world, [ball]);
@@ -239,8 +239,9 @@
 
   .spawn-ball {
     position: absolute;
-    top: 800px;
+    bottom: 50px;
     left: 0;
+    right: 0;
   }
 
   .progress-container {

@@ -83,6 +83,7 @@
         margin-top: 10px;
         font-size: 12px;
         font-style: italic;
+        user-select: none;
       }
       .explain-dialog {
         padding: 16px;

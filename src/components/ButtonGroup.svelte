@@ -81,7 +81,7 @@
       >
       <p class="button-explain-text">Get a hint</p>
 
-      <Dialog class="pa-4" bind:active>
+      <Dialog class="pa-4" bind:active="{active}">
         {$gameElementStore.hint}
       </Dialog>
     </div>
@@ -102,6 +102,7 @@
         margin-top: 10px;
         font-size: 12px;
         font-style: italic;
+        user-select: none;
       }
       .explain-dialog {
         padding: 16px;
@@ -109,6 +110,7 @@
       .change-button {
         display: flex;
         justify-content: center;
+        align-items: center;
         box-shadow: 0.5px 1px 4px 1px transparentize($main-color, 0.8);
         border: 0;
         background: unset;

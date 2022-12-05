@@ -39,20 +39,41 @@
   }
 </script>
 
-<!--  <MoveMan />-->
-<!--  <ActualPinball />-->
-<!--  <Pinball />-->
-<!--  <LetterMover />-->
-<!--  <GravityPlusButton />-->
-<!--<MovingPlusButton />-->
+<!-- DONE -->
+<!-- TODO maybe add more colliders?-->
 
-<!--  <Candle />-->
-<!--  <SpinningPlusButton />-->
-<!--  <SnowballDrag />-->
+<!--<ActualPinball />-->
+<!--<MovingPlusButton />-->
+<!--    <GravityPlusButton />-->
+
+<!-- TODO fix text behind -->
+<!--<Pinball />-->
+
 <!--  <Pinball2 />-->
+<!--{#if true}-->
 
 {#if !$gameElementStore.attributes}
   <Counter setInputButtonsVisible="{true}" />
+{:else if $gameElementStore.attributes.type === GameType.actualPinball}
+  <ActualPinball />
+{:else if $gameElementStore.attributes.type === GameType.pinball2}
+  <Pinball2 />
+{:else if $gameElementStore.attributes.type === GameType.pinball}
+  <Pinball />
+{:else if $gameElementStore.attributes.type === GameType.letterMover}
+  <LetterMover />
+{:else if $gameElementStore.attributes.type === GameType.movingMan}
+  <MoveMan />
+{:else if $gameElementStore.attributes.type === GameType.candle}
+  <Candle />
+{:else if $gameElementStore.attributes.type === GameType.gravityPlusButton}
+  <GravityPlusButton />
+{:else if $gameElementStore.attributes.type === GameType.movingPlus}
+  <MovingPlusButton />
+{:else if $gameElementStore.attributes.type === GameType.snowball}
+  <SnowballDrag />
+{:else if $gameElementStore.attributes.type === GameType.spinPlus}
+  <SpinningPlusButton />
 {:else if !$gameElementStore.attributes}
   <Counter setInputButtonsVisible="{true}" />
 {:else if $gameElementStore.attributes.type === GameType.answer || $gameElementStore.attributes.type === GameType.hacker}

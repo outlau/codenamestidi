@@ -41,7 +41,7 @@
 <ProgressBar />
 <div class="answer-container">
   <TextField
-    bind:value
+    bind:value="{value}"
     disabled="{value === $gameElementStore.attributes.answer &&
       $gameElementStore.currentCount >= $gameElementStore.maxCount}"
     on:input="{input}"

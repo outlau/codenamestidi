@@ -8,7 +8,6 @@
     inputButtonsVisible.set(false);
   });
 
-
   onDestroy(() => {
     inputButtonsVisible.set(false);
   });
@@ -30,5 +29,4 @@
 <style lang="scss">
   // TODO
   $main-color: #0e3c79;
-
 </style>

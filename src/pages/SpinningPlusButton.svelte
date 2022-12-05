@@ -4,10 +4,8 @@
   import ProgressBar from '../components/ProgressBar.svelte';
   import { SupabaseObject } from '../db';
 
-  let isDragging = false;
-
   let rot = 0;
-  const rotMlt = 9;
+  const rotMlt = 1;
   let success = false;
   let holding = false;
 
@@ -114,6 +112,9 @@
     width: 50px;
     height: 50px;
     font-size: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .button-group-container {
     margin-top: 15px;
@@ -126,6 +127,7 @@
         margin-top: 10px;
         font-size: 12px;
         font-style: italic;
+        user-select: none;
       }
       .explain-dialog {
         padding: 16px;

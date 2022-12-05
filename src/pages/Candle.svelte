@@ -3,6 +3,7 @@
 
   import { gameElementStore, inputButtonsVisible } from '../store';
   import ButtonGroup from '../components/ButtonGroup.svelte';
+  import interact from '@interactjs/interact';
 
   let isOn = false;
   let success = false;
@@ -61,7 +62,6 @@
         (diffBlue * progressColorPerc) / 100 + startColor.blue;
     }, 100);
 
-    const draggable = document.getElementById('draggable');
     const candle = document.getElementById('candle-container');
     const top = document.getElementById('top');
     const progressContainer = document.getElementById('progress-container-id');
@@ -72,55 +72,44 @@
     const offsetTop = progressContainerRect.top;
     const offsetBottom = progressContainerRect.bottom;
 
-    // Mouse Down Event
-    function downEvent(event) {
-      if (success) return;
-      setMouseCoordinates(event);
-      isDragging = true;
+    interact('#draggable').draggable({
+      // enable inertial throwing
+      inertia: true,
 
-      // Start Drawing
-    }
-    draggable.addEventListener('mousedown', downEvent);
-    draggable.addEventListener('touchstart', downEvent);
+      // enable autoScroll
+      autoScroll: true,
 
-    // Mouse Move Event
-    function moveEvent(event) {
+      listeners: {
+        // call this function on every dragmove event
+        move: dragMoveListener,
+
+        // call this function on every dragend event
+        end: (event) => {},
+      },
+    });
+    function dragMoveListener(event) {
+      // var target = event.target;
+      // keep the dragged position in the data-x/data-y attributes
+      var x = (parseFloat(candle.getAttribute('data-x')) || 0) + event.dx;
+      var y = (parseFloat(candle.getAttribute('data-y')) || 0) + event.dy;
+
+      // translate the el
+      candle.style.transform = `translate(${x}px, ${y}px)`;
+
+      // update the posiion attributes
+      candle.setAttribute('data-x', x);
+      candle.setAttribute('data-y', y);
+
       const topRect = top.getBoundingClientRect();
-      if (isDragging) {
-        candle.style.left = mouseX - 25 + 'px';
-        candle.style.top = mouseY - 200 + 'px';
-
-        if (
-          topRect.top + 100 > offsetTop &&
-          topRect.top + 30 < offsetBottom &&
-          topRect.left + 25 / 2 > offsetLeft &&
-          topRect.left + 25 / 2 < offsetRight
-        ) {
-          candleOnBar = true;
-        } else {
-          candleOnBar = false;
-        }
-        setMouseCoordinates(event);
-      }
-    }
-    window.addEventListener('mousemove', moveEvent);
-    window.addEventListener('touchmove', moveEvent);
-
-    // Mouse Up Event
-    function upEvent(event) {
-      isDragging = false;
-    }
-    window.addEventListener('mouseup', upEvent);
-    window.addEventListener('touchend', upEvent);
-
-    // Handle Mouse Coordinates
-    function setMouseCoordinates(event) {
-      if (event.touches) {
-        mouseX = event.touches[0].clientX; // - boundings.left;
-        mouseY = event.touches[0].clientY; //- boundings.top;
+      if (
+        topRect.top + 100 > offsetTop &&
+        topRect.top + 30 < offsetBottom &&
+        topRect.left + 25 / 2 > offsetLeft &&
+        topRect.left + 25 / 2 < offsetRight
+      ) {
+        candleOnBar = true;
       } else {
-        mouseX = event.clientX; // - boundings.left;
-        mouseY = event.clientY; // - boundings.top;
+        candleOnBar = false;
       }
     }
   });
@@ -328,6 +317,9 @@
     width: 100%;
     height: 50px;
     background: $orange-yellow;
+
+    touch-action: none;
+    user-select: none;
     background: -moz-linear-gradient(
       top,
       $orange-yellow 0px,

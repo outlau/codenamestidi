@@ -60,7 +60,7 @@ export class SupabaseObject {
     if (error) {
       throw error;
     }
-    if(!data || data.length === 0) {
+    if (!data || data.length === 0) {
       return null;
     }
     return {

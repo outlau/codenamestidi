@@ -14,6 +14,12 @@
   import { inputButtonsVisible } from '../store';
   import { clamp } from '../lib/helpers';
   import ProgressBar from '../components/ProgressBar.svelte';
+  import '@interactjs/auto-start';
+  import '@interactjs/actions/drag';
+  import '@interactjs/actions/resize';
+  import '@interactjs/modifiers';
+  import '@interactjs/dev-tools';
+  import interact from '@interactjs/interact';
 
   let engine;
   let canvasWidth;
@@ -28,7 +34,7 @@
     const canvasContainer = document.getElementById('canvas-container');
 
     canvasWidth = canvasContainer.offsetWidth;
-    canvasHeight = 800;
+    canvasHeight = document.body.clientHeight - 200;
     // create engine
     engine = Engine.create();
     const world = engine.world;
@@ -81,7 +87,7 @@
 
     const collisionBox = Bodies.rectangle(
       canvasWidth / 2 + 10,
-      canvasHeight / 2 + 100 + 15,
+      canvasHeight - 100 + 15,
       20,
       2,
       {
@@ -136,10 +142,10 @@
         }
       ),
 
-      Bodies.rectangle(canvasWidth / 2, canvasHeight / 2 + 100, 2, 30, {
+      Bodies.rectangle(canvasWidth / 2, canvasHeight - 100, 2, 30, {
         isStatic: true,
       }),
-      Bodies.rectangle(canvasWidth / 2 + 20, canvasHeight / 2 + 100, 2, 30, {
+      Bodies.rectangle(canvasWidth / 2 + 20, canvasHeight - 100, 2, 30, {
         isStatic: true,
       }),
       collisionBox,
@@ -169,64 +175,58 @@
     /*
      * HANDLE PINBALL BUTTON
      */
-    const draggable = document.getElementById('draggable');
-    // const plusContainer = document.getElementById('plus-container-id');
-    // const offsetLeft = plusContainer.offsetLeft;
-    // const offsetTop = plusContainer.offsetTop;
 
+    const draggable = document.getElementById('draggable');
     draggable.style.left = `${canvasWidth - draggable.offsetWidth}px`;
     draggable.style.top = `${canvasHeight}px`;
 
-    // Mouse Down Event
-    function downEvent(event) {
-      setMouseCoordinates(event);
-      isDragging = true;
+    interact('#draggable').draggable({
+      // enable inertial throwing
+      inertia: true,
 
-      // Start Drawing
-    }
-    draggable.addEventListener('mousedown', downEvent);
-    draggable.addEventListener('touchstart', downEvent);
+      // enable autoScroll
+      autoScroll: true,
 
-    // Mouse Move Event
-    function moveEvent(event) {
-      if (isDragging) {
-        const top = clamp(mouseY - 25, canvasHeight, canvasHeight + 100);
-        draggable.style.top = top + 'px';
+      listeners: {
+        // call this function on every dragmove event
+        move: dragMoveListener,
 
-        setMouseCoordinates(event);
+        // call this function on every dragend event
+        end: (event) => {
+          const velocity = 10;
+          const startTop = draggable.getBoundingClientRect().top;
+          let pos = canvasHeight - startTop;
+          spawnBall((startTop - canvasHeight) / 100);
+          const interval = setInterval(() => {
+            const top = startTop;
+            draggable.style.transform = `translate(0px, ${pos}px)`;
+            draggable.setAttribute('data-y', pos.toString());
+            if (pos <= 0) {
+              draggable.style.transform = `translate(0px, 0px)`;
+              draggable.setAttribute('data-y', '0');
+              clearInterval(interval);
+              return;
+            }
+            pos -= velocity;
+          }, 16);
+        },
+      },
+    });
+    function dragMoveListener(event) {
+      var target = event.target;
+      // keep the dragged position in the data-x/data-y attributes
+      // var x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
+      var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+      // translate the element
+      if (y > 150 || y <= 0) {
+        return;
       }
-    }
-    window.addEventListener('mousemove', moveEvent);
-    window.addEventListener('touchmove', moveEvent);
+      target.style.transform = 'translate(0px, ' + y + 'px)';
 
-    // Mouse Up Event
-    function upEvent(event) {
-      isDragging = false;
-      const velocity = 10;
-      const startTop = draggable.style.top.split('px')[0];
-      spawnBall((startTop - canvasHeight) / 100);
-      const interval = setInterval(() => {
-        const top = draggable.style.top.split('px')[0];
-        if (top <= canvasHeight) {
-          draggable.style.top = `${canvasHeight}px`;
-          clearInterval(interval);
-          return;
-        }
-        draggable.style.top = `${top - velocity}px`;
-      }, 16);
-    }
-    draggable.addEventListener('mouseup', upEvent);
-    draggable.addEventListener('touchend', upEvent);
-
-    // Handle Mouse Coordinates
-    function setMouseCoordinates(event) {
-      if (event.touches) {
-        mouseX = event.touches[0].clientX; // - boundings.left;
-        mouseY = event.touches[0].clientY; //- boundings.top;
-      } else {
-        mouseX = event.clientX; // - boundings.left;
-        mouseY = event.clientY; // - boundings.top;
-      }
+      // update the posiion attributes
+      // target.setAttribute("data-x", x);
+      target.setAttribute('data-y', y);
     }
   });
 
@@ -242,7 +242,7 @@
         },
       }
     );
-    const max = 0.005;
+    const max = 0.0032;
     const yForce = max * force;
     ball.force = { x: 0, y: -yForce };
     Composite.add(engine.world, [ball]);
@@ -265,6 +265,8 @@
     font-size: 30px;
     border: 1px solid black;
     z-index: 100;
+    touch-action: none;
+    user-select: none;
   }
 
   #drag-indicator {
@@ -273,7 +275,7 @@
     height: 1px;
     background: black;
     // todo this is not generic
-    top: 950px;
+    top: calc(100% - 1px);
     right: 0;
   }
 

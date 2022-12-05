@@ -22,7 +22,7 @@
     const canvasContainer = document.getElementById('canvas-container');
 
     canvasWidth = canvasContainer.offsetWidth;
-    canvasHeight = 800;
+    canvasHeight = document.documentElement.clientHeight;
     // create engine
     engine = Engine.create();
     const world = engine.world;
@@ -74,7 +74,7 @@
     });
 
     const numInRow = 15;
-    const circles = Array(300)
+    const circles = Array(270)
       .fill(0)
       .map((_, i) => {
         const offset = (Math.floor(i / numInRow) % 6) * 13;

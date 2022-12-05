@@ -12,7 +12,7 @@
       state.completed = true;
       return state;
     });
-    window.location.href = '/'
+    window.location.href = '/';
   }
 </script>
 

@@ -14,8 +14,8 @@
   let xVelocity = 0;
   let yVelocity = 0;
 
-  let xVelocityMlt = 3;
-  let yVelocityMlt = 3;
+  let xVelocityMlt = 1;
+  let yVelocityMlt = 1;
 
   let plusPosX = '0px';
   let plusPosY = '0px';
@@ -273,6 +273,8 @@
 
   .arrow {
     font-size: 50px;
+    touch-action: none;
+    user-select: none;
   }
 
   #plus {
@@ -299,6 +301,7 @@
         margin-top: 10px;
         font-size: 12px;
         font-style: italic;
+        user-select: none;
       }
 
       .explain-dialog {

@@ -32,7 +32,7 @@
     // @ts-ignore
     let acl = new Accelerometer({ frequency: 60 });
     acl.addEventListener('reading', () => {
-      if(success){
+      if (success) {
         return;
       }
       dx = acl.x;
@@ -165,6 +165,7 @@
         margin-top: 10px;
         font-size: 12px;
         font-style: italic;
+        user-select: none;
       }
       .explain-dialog {
         padding: 16px;

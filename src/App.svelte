@@ -29,7 +29,7 @@
   let nextGameElement: GameElement;
 
   async function setGameElement() {
-    if(finishedGame) {
+    if (finishedGame) {
       return;
     }
     let tempGameElement = await SupabaseObject.getGameElement();
@@ -155,11 +155,20 @@
       >
         <Route path="">
           <!-- TODO -->
-          <h1>The <br /> adventures of <br /> Sti</h1>
+          <h1
+            style="{`color: ${
+              $gameElementStore &&
+              $gameElementStore.attributes.type === GameType.letterMover
+                ? 'transparent'
+                : 'unset'
+            }`}"
+          >
+            The <br /> ADVENTures of <br /> Sti
+          </h1>
           {#if finishedGame}
             Congratulations you have successfully completed the Adventures of
-            Sti. Please contact the overlord to receive your final prize if you
-            haven't already.
+            Sti. Please contact the christmas elf to receive your final prize if
+            you haven't already.
 
             <div class="fireworks-container"></div>
 
@@ -338,10 +347,11 @@
   h1 {
     font-size: 2em;
     color: #505050;
-    text-transform: uppercase;
+    //text-transform: uppercase;
     font-weight: 100;
     line-height: 1.2;
     margin-bottom: 50px;
+    user-select: none;
   }
 
   @media (min-width: 640px) {

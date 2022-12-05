@@ -11,8 +11,7 @@
 
   onDestroy(() => {
     inputButtonsVisible.set(false);
-  })
-
+  });
 </script>
 
 <ProgressBar />

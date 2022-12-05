@@ -2,101 +2,93 @@
   import { gameElementStore, inputButtonsVisible } from '../store';
   import { onDestroy, onMount } from 'svelte';
   import ProgressBar from '../components/ProgressBar.svelte';
-  import { SupabaseObject } from '../db';
   import ButtonGroup from '../components/ButtonGroup.svelte';
-
-  let isDragging = false;
-
-  let mouseX = 0;
-  let mouseY = 0;
+  import '@interactjs/auto-start';
+  import '@interactjs/actions/drag';
+  import '@interactjs/actions/resize';
+  import '@interactjs/modifiers';
+  import '@interactjs/dev-tools';
+  import interact from '@interactjs/interact';
 
   let curDraggable = null;
 
   let dx = 0;
   let dy = 0;
 
-  let prevX = 0;
-  let prevY = 0;
+  let x = 0;
+  let y = 0;
 
   let interval;
 
   onMount(() => {
     inputButtonsVisible.set(true);
 
-    window.addEventListener('mousemove', moveEvent);
-    window.addEventListener('touchmove', moveEvent);
+    interact('.draggable').draggable({
+      // enable inertial throwing
+      inertia: true,
 
-    // Mouse Up Event
+      // enable autoScroll
+      autoScroll: true,
+
+      listeners: {
+        // call this function on every dragmove event
+        move: dragMoveListener,
+        start: (event) => {
+          curDraggable = event.target;
+          clearInterval(interval);
+        },
+
+        // call this function on every dragend event
+        end: (event) => {
+          dx = event.velocity.x;
+          dy = event.velocity.y;
+        },
+      },
+    });
+    function dragMoveListener(event) {
+      var target = event.target;
+      // keep the dragged position in the data-x/data-y attributes
+      var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+      var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+      // translate the element
+      target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+      // update the posiion attributes
+      target.setAttribute('data-x', x);
+      target.setAttribute('data-y', y);
+    }
+
+    // // Mouse Up Event
     function upEvent(event) {
       clearInterval(interval);
       interval = setInterval(() => {
-        dx = mouseX - prevX;
-        dy = mouseY - prevY;
+        const x =
+          (parseFloat(curDraggable.getAttribute('data-x')) || 0) + dx / 100;
+        const y =
+          (parseFloat(curDraggable.getAttribute('data-y')) || 0) + dy / 100;
 
-        curDraggable.style.left =
-          Number(curDraggable.style.left.split('px')[0]) + dx + 'px';
-        curDraggable.style.top =
-          Number(curDraggable.style.top.split('px')[0]) + dy + 'px';
+        // translate the element
+        curDraggable.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+        curDraggable.setAttribute('data-x', x);
+        curDraggable.setAttribute('data-y', y);
+
         if (
-          Number(curDraggable.style.left.split('px')[0]) < -50 ||
-          Number(curDraggable.style.left.split('px')[0]) >
-            document.body.clientWidth - 75 ||
-          Number(curDraggable.style.top.split('px')[0]) < -50 ||
-          Number(curDraggable.style.top.split('px')[0]) >
-            document.body.clientHeight - 75
+          curDraggable.getBoundingClientRect().left < 0 ||
+          curDraggable.getBoundingClientRect().right >
+            document.body.clientWidth ||
+          curDraggable.getBoundingClientRect().top < 0 ||
+          curDraggable.getBoundingClientRect().bottom >
+            document.body.clientHeight
         ) {
           clearInterval(interval);
           curDraggable.style.visibility = 'hidden';
         }
       }, 16);
-      isDragging = false;
     }
     window.addEventListener('mouseup', upEvent);
     window.addEventListener('touchend', upEvent);
-
-    // Handle Mouse Coordinates
   });
-
-  function setMouseCoordinates(event) {
-    if (event.touches) {
-      mouseX = event.touches[0].clientX; // - boundings.left;
-      mouseY = event.touches[0].clientY; //- boundings.top;
-    } else {
-      mouseX = event.clientX; // - boundings.left;
-      mouseY = event.clientY; // - boundings.top;
-    }
-  }
-
-  function moveEvent(event) {
-    if (isDragging) {
-      prevX = mouseX;
-      prevY = mouseY;
-      curDraggable.style.left = mouseX - 25 + 'px';
-      curDraggable.style.top = mouseY - 25 + 'px';
-
-      setMouseCoordinates(event);
-    }
-  }
-
-  function downEvent(event) {
-    setMouseCoordinates(event);
-    isDragging = true;
-    curDraggable = event.target;
-  }
-
-  function increment() {
-    if ($gameElementStore.currentCount < $gameElementStore.maxCount) {
-      $gameElementStore.currentCount++;
-      SupabaseObject.setGameElementCount($gameElementStore);
-    }
-  }
-
-  function decrement() {
-    if ($gameElementStore.currentCount > 0) {
-      $gameElementStore.currentCount--;
-      SupabaseObject.setGameElementCount($gameElementStore);
-    }
-  }
 
   onDestroy(() => {
     inputButtonsVisible.set(false);
@@ -106,7 +98,6 @@
 {#each Array(500).fill(null) as _, i}
   <div
     class="draggable"
-    on:touchstart="{downEvent}"
     style="left: {Math.random() * 90}%; top: {Math.random() * 90}%"
   ></div>
 {/each}
@@ -126,7 +117,7 @@
   }
 
   .draggable {
-    background-image: url('/images/snowball.png');
+    background-image: url('/snowball.png');
     background-size: contain;
     //background: #424242;
     cursor: pointer;
@@ -136,6 +127,8 @@
     height: 50px;
     font-size: 30px;
     z-index: 100;
+    touch-action: none;
+    user-select: none;
   }
   .button-group-container {
     margin-top: 15px;
@@ -148,6 +141,7 @@
         margin-top: 10px;
         font-size: 12px;
         font-style: italic;
+        user-select: none;
       }
       .explain-dialog {
         padding: 16px;

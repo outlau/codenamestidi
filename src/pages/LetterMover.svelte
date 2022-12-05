@@ -121,7 +121,7 @@
           const allCompleted = letters.every((row) =>
             row.every((l) => l.completed)
           );
-          if(allCompleted){
+          if (allCompleted) {
             inputButtonsVisible.set(true);
             console.log('succes');
           }
@@ -364,6 +364,7 @@
 
   .arrow {
     font-size: 50px;
+    user-select: none;
   }
 
   .selected-letter {
